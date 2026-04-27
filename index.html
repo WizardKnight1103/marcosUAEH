@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Marco UAEH — Foto Institucional | Rotación Continua</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rojo:    #9B2335;
+    --rojo-dk: #7A1A28;
+    --rojo-lt: #C4384F;
+    --beige:   #C4A882;
+    --beige-lt:#EDE0CE;
+    --beige-dk:#A08060;
+    --negro:   #1A1A1A;
+    --gris:    #5A5A5A;
+    --gris-lt: #F5F0EB;
+    --blanco:  #FFFFFF;
+    --sombra:  0 4px 24px rgba(155,35,53,0.12);
+    --radio:   14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gris-lt);
+    color: var(--negro);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--beige);
+    color: var(--negro);
+    padding: 18px 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 18px,
+      rgba(255,255,255,0.04) 18px,
+      rgba(255,255,255,0.04) 36px
+    );
+  }
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .header-logo {
+    max-width: 80px;
+    height: auto;
+    position: relative;
+    z-index: 1;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 5vw, 1.9rem);
+    letter-spacing: .5px;
+  }
+  header p {
+    font-size: .82rem;
+    opacity: .85;
+    margin-top: 4px;
+  }
+  .uaeh-badge {
+    display: inline-block;
+    background: var(--rojo);
+    color: var(--blanco);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 640px) {
+    header { flex-direction: column; gap: 12px; }
+    .header-logo { max-width: 60px; }
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 14px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 640px) {
+    .app { grid-template-columns: 1fr; padding: 14px 10px 32px; gap: 14px; }
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 18px 16px;
+  }
+  .card-title {
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--rojo);
+    border-bottom: 2px solid var(--beige-lt);
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+  }
+
+  /* ── UPLOAD ZONES ── */
+  .upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .upload-zone {
+    border: 2px dashed var(--beige-dk);
+    border-radius: 10px;
+    padding: 18px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: var(--gris-lt);
+    position: relative;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--rojo); background: #fdf5f5; }
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+  .upload-zone .icon { font-size: 1.8rem; }
+  .upload-zone .label { font-size: .75rem; font-weight: 600; color: var(--gris); }
+  .upload-zone .sub   { font-size: .68rem; color: var(--beige-dk); }
+  .upload-zone.loaded { border-color: var(--rojo); border-style: solid; background: #fff8f8; }
+  .upload-zone.loaded .icon::after { content: ' ✓'; font-size: 1rem; color: var(--rojo); }
+
+  /* ── THUMBS ── */
+  .thumb-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .thumb-item {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .2s;
+    aspect-ratio: 1;
+  }
+  .thumb-item.active { border-color: var(--rojo); }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-badge {
+    position: absolute; bottom: 4px; right: 4px;
+    background: rgba(26,26,26,.75); color: #fff;
+    font-size: .65rem; padding: 2px 6px; border-radius: 4px;
+  }
+  .btn-clear {
+    width: 100%;
+    padding: 9px;
+    background: #fff;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: .78rem;
+    color: var(--gris);
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+    margin-bottom: 14px;
+  }
+  .btn-clear:hover { border-color: var(--rojo); color: var(--rojo); }
+
+  /* ── FRAME GRID ── */
+  .frame-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .frame-opt {
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .2s, transform .15s;
+    background: var(--gris-lt);
+  }
+  .frame-opt:hover { transform: translateY(-2px); border-color: var(--beige-dk); }
+  .frame-opt.active { border-color: var(--rojo); }
+  .frame-opt img { display: block; width: 100%; height: 100px; object-fit: cover; background: #eee; }
+  .frame-opt .fname {
+    font-size: .65rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 6px 2px;
+    background: var(--gris-lt);
+    color: var(--negro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── PREVIEW ── */
+  .preview-wrap {
+    background: var(--gris-lt);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  #previewCanvas { max-width: 100%; max-height: 360px; border-radius: 8px; display: none; }
+  .no-preview-msg {
+    text-align: center;
+    color: var(--beige-dk);
+    font-size: .82rem;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  .no-preview-msg span { font-size: 2.2rem; display: block; margin-bottom: 8px; }
+
+  /* ── CONTROLES ── */
+  .controls-block { margin-bottom: 14px; }
+  .ctrl-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--gris);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .photo-sel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .photo-sel-btn {
+    padding: 8px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .photo-sel-btn.active { background: var(--rojo); color: #fff; border-color: var(--rojo); }
+  .photo-sel-btn:disabled { opacity: .4; cursor: default; }
+
+  /* Sliders */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--beige-lt);
+    outline: none;
+  }
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--rojo);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(155,35,53,.3);
+  }
+  .slider-val { font-size: .78rem; font-weight: 600; color: var(--rojo); min-width: 48px; text-align: right; }
+
+  /* Position grid / rotación */
+  .pos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-bottom: 16px;
+  }
+  .pos-btn {
+    aspect-ratio: 1;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .2s, background .2s;
+  }
+  .pos-btn:hover { border-color: var(--beige-dk); background: var(--gris-lt); }
+  .pos-btn.active { background: var(--rojo); border-color: var(--rojo); }
+
+  /* Edit buttons (rotación refinada) */
+  .rotate-panel {
+    background: #faf8f5;
+    border-radius: 12px;
+    padding: 12px 10px;
+    margin: 8px 0 12px 0;
+    border: 1px solid #eee;
+  }
+  .angle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .angle-value {
+    background: var(--blanco);
+    border-radius: 30px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: .8rem;
+    color: var(--rojo);
+    border: 1px solid #ddd;
+    min-width: 70px;
+    text-align: center;
+  }
+  .icon-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .edit-btn {
+    flex: 1;
+    padding: 9px 6px;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    border-radius: 8px;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .edit-btn.small { flex: 0.5; background: var(--gris-lt); }
+  .edit-btn:hover { border-color: var(--rojo); background: #fff0f0; }
+  .edit-btn.active { background: var(--rojo); color: #fff; border-color: var(--rojo); }
+
+  /* Resolution */
+  .res-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-family: inherit;
+    background: #fff;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .res-select:focus { outline: none; border-color: var(--rojo); }
+
+  .btn-download {
+    width: 100%;
+    padding: 13px;
+    background: var(--rojo);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: .5px;
+    transition: background .2s, transform .15s;
+  }
+  .btn-download:hover:not(:disabled) { background: var(--rojo-dk); transform: translateY(-1px); }
+  .btn-download:disabled { opacity: .5; cursor: default; }
+
+  .fit-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .72rem;
+    color: var(--beige-dk);
+    background: var(--gris-lt);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+  }
+  .fit-info .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rojo); }
+
+  /* Crop modal */
+  .crop-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,10,10,0.88);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .crop-overlay.open { display: flex; }
+  .crop-modal {
+    background: var(--negro);
+    border-radius: 14px;
+    padding: 16px;
+    width: 100%;
+    max-width: 520px;
+  }
+  .crop-modal h3 { color: #fff; font-size: .9rem; text-align: center; }
+  .crop-canvas-wrap { position: relative; background: #111; border-radius: 8px; overflow: hidden; cursor: crosshair; margin: 10px 0; }
+  #cropCanvas { display: block; width: 100%; }
+  .crop-hint { font-size: .72rem; color: var(--beige); text-align: center; }
+  .crop-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .crop-btn { padding: 12px; border: none; border-radius: 9px; font-weight: 600; cursor: pointer; }
+  .crop-btn.confirm { background: var(--rojo); color: #fff; }
+  .crop-btn.cancel { background: #333; color: #ccc; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--negro);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-size: .83rem;
+    font-weight: 500;
+    transition: transform .3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--rojo-dk); }
+  .toast.error   { background: #c0392b; }
+
+  footer {
+    text-align: center;
+    padding: 14px;
+    font-size: .72rem;
+    color: var(--beige-dk);
+  }
+  footer strong { color: var(--rojo); }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo (3).png" alt="Logo 1" class="header-logo">
+  <div class="header-content">
+    <div class="uaeh-badge">UAEH · Amor, Orden y Progreso</div>
+    <h1>📸 Foto con Marco Institucional</h1>
+    <p>Rotación libre | Ajusta ángulo, escala y posición</p>
+  </div>
+  <img src="uaeh_logo_color.png" alt="Logo UAEH" class="header-logo">
+</header>
+
+<div class="app">
+  <!-- COLUMNA IZQUIERDA -->
+  <div>
+    <div class="card">
+      <div class="card-title">① Sube tu foto</div>
+      <div class="upload-grid">
+        <div class="upload-zone" id="zone1"><input type="file" id="file1" accept="image/*"><div class="icon">📷</div><div class="label">Foto 1</div><div class="sub">Toca o arrastra</div></div>
+        <div class="upload-zone" id="zone2"><input type="file" id="file2" accept="image/*"><div class="icon">📷</div><div class="label">Foto 2</div><div class="sub">Opcional</div></div>
+      </div>
+      <div id="thumbSection" style="display:none">
+        <div class="thumb-row" id="thumbRow"></div>
+        <button class="btn-clear" id="clearBtn">🗑 Eliminar todas las fotos</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:0">
+      <div class="card-title">② Elige un marco</div>
+      <div class="frame-grid" id="frameGrid"></div>
+    </div>
+  </div>
+
+  <!-- COLUMNA DERECHA -->
+  <div>
+    <div class="card">
+      <div class="card-title">③ Vista previa</div>
+      <div class="preview-wrap" id="previewWrap">
+        <canvas id="previewCanvas"></canvas>
+        <div class="no-preview-msg" id="noMsg"><span>🖼️</span>Sube una foto y selecciona<br>un marco para comenzar</div>
+      </div>
+
+      <div id="photoCtrl" style="display:none">
+        <div class="photo-sel" id="photoSelRow">
+          <button class="photo-sel-btn active" id="selBtn1">📸 Foto 1</button>
+          <button class="photo-sel-btn" id="selBtn2" disabled>📸 Foto 2</button>
+        </div>
+        <div class="fit-info"><div class="dot"></div><span>Control total: escala, posición y rotación continua</span></div>
+
+        <span class="ctrl-label">Tamaño</span>
+        <div class="slider-row"><input type="range" id="scaleSlider" min="0.2" max="2.5" step="0.02" value="1.0"><span class="slider-val" id="scaleVal">100%</span></div>
+
+        <span class="ctrl-label">Posición</span>
+        <div class="pos-grid">
+          <button class="pos-btn" data-pos="top-left">↖️</button><button class="pos-btn" data-pos="top-center">⬆️</button><button class="pos-btn" data-pos="top-right">↗️</button>
+          <button class="pos-btn" data-pos="mid-left">⬅️</button><button class="pos-btn active" data-pos="mid-center">◉</button><button class="pos-btn" data-pos="mid-right">➡️</button>
+          <button class="pos-btn" data-pos="bot-left">↙️</button><button class="pos-btn" data-pos="bot-center">⬇️</button><button class="pos-btn" data-pos="bot-right">↘️</button>
+        </div>
+
+        <span class="ctrl-label">🔄 Rotación libre</span>
+        <div class="rotate-panel">
+          <div class="icon-buttons">
+            <button class="edit-btn" id="resetRotBtn" style="flex:1">⟳ Reset ángulo</button>
+            <button class="edit-btn" id="flipBtn">↔️ Voltear</button>
+          </div>
+          <div class="angle-row">
+            <span style="font-size:.7rem; opacity:.7;">Ángulo:</span>
+            <input type="range" id="angleSlider" min="0" max="360" step="1" value="0" style="flex:1">
+            <span class="angle-value" id="angleVal">0°</span>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button class="edit-btn small" id="rotLeftBtn">↺ -15°</button>
+            <button class="edit-btn small" id="rotRightBtn">↻ +15°</button>
+          </div>
+        </div>
+
+        <div class="edit-row" style="margin-top: -4px;">
+          <button class="edit-btn" id="cropBtn">✂️ Recortar</button>
+        </div>
+      </div>
+
+      <select class="res-select" id="resSel">
+        <option value="1080">1080 × 1080 px — Instagram</option>
+        <option value="1200" selected>1200 × 1200 px — Recomendado</option>
+        <option value="1600">1600 × 1600 px — Alta calidad</option>
+        <option value="2048">2048 × 2048 px — Máxima calidad</option>
+      </select>
+      <button class="btn-download" id="dlBtn" disabled>💾 Descargar imagen</button>
+    </div>
+  </div>
+</div>
+
+<footer>Herramienta no oficial · Colores basados en la identidad visual de la <strong>UAEH</strong> · Amor, Orden y Progreso</footer>
+
+<div class="crop-overlay" id="cropOverlay"><div class="crop-modal"><h3>✂️ Recortar imagen</h3><div class="crop-canvas-wrap"><canvas id="cropCanvas"></canvas></div><p class="crop-hint">Arrastra para seleccionar el área a recortar</p><div class="crop-actions"><button class="crop-btn cancel" onclick="closeCrop()">✕ Cancelar</button><button class="crop-btn confirm" onclick="applyCrop()">✔ Aplicar recorte</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // -------- ESTADO ----------
+  const photos = [null, null];
+  const state  = [
+    { scale: 1.0, pos: 'mid-center', rot: 0, flip: false },
+    { scale: 1.0, pos: 'mid-center', rot: 0, flip: false }
+  ];
+  let curPhoto = 0;
+  let curFrame = 0;
+  let frames = [];
+
+  // -------- MARCOS Y FONDOS ----------
+  // isBackground: true → se dibuja ANTES de la foto (fondo)
+  // isBackground: false/undefined → se dibuja DESPUÉS de la foto (marco encima)
+  const pngFrameList = [
+    { file: '2.png',  name: 'Marco Elegante',      isBackground: false },
+    { file: '4.png',  name: 'Fondo Moderno',        isBackground: true  },
+    { file: '8.png',  name: 'Marco Dorado',         isBackground: false },
+    { file: '10.png', name: 'Fondo Rojo',           isBackground: true  },
+    { file: '13.png', name: 'Marco Especial',       isBackground: false },
+    { file: '16.png', name: 'Marco Institucional',  isBackground: false },
+    { file: '19.png', name: 'Fondo Oficial',        isBackground: true  },
+  ];
+
+  function makeInteriorTransparent(img, fileName) {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const tmp = document.createElement('canvas');
+    tmp.width = W; tmp.height = H;
+    const tc = tmp.getContext('2d');
+    tc.drawImage(img, 0, 0);
+    let data;
+    try { data = tc.getImageData(0, 0, W, H); } catch(e) { return img; }
+    const d = data.data;
+
+    // Imagen 13: eliminar fondo café/marrón en toda la imagen
+    if (fileName === '13.png') {
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        // Tonos café/marrón: R alto, G medio, B bajo
+        if (r > 120 && g > 80 && b < 110 && r > g && r > b && (r - b) > 40) {
+          d[i+3] = 0;
+        }
+        // Blancos sucios y beige claro de fondo
+        if (r > 200 && g > 180 && b > 150 && Math.max(r,g,b) - Math.min(r,g,b) < 60) {
+          d[i+3] = 0;
+        }
+      }
+      tc.putImageData(data, 0, 0);
+      const result = new Image();
+      result.src = tmp.toDataURL('image/png');
+      return result;
+    }
+
+    // Resto de marcos: transparentar interior blanco
+    const threshold = 235;
+    const marginX = Math.floor(W * 0.06), marginY = Math.floor(H * 0.06);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const isBorder = (x < marginX || x >= W - marginX || y < marginY || y >= H - marginY);
+        if (!isBorder) {
+          const idx = (y * W + x) * 4;
+          if (d[idx] > threshold && d[idx+1] > threshold && d[idx+2] > threshold) d[idx+3] = 0;
+        }
+      }
+    }
+    tc.putImageData(data, 0, 0);
+    const result = new Image();
+    result.src = tmp.toDataURL('image/png');
+    return result;
+  }
+
+  function preloadPngFrames() {
+    return Promise.all(pngFrameList.map(frameData => new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const processed = makeInteriorTransparent(img, frameData.file);
+        const pushFrame = (finalImg) => {
+          frames.push({ name: frameData.name, file: frameData.file, img: finalImg, isBackground: frameData.isBackground,
+            draw(ctx, W, H) { if(finalImg.complete && finalImg.naturalWidth) ctx.drawImage(finalImg, 0, 0, W, H); } });
+          resolve();
+        };
+        if (processed !== img && !processed.complete) processed.onload = () => pushFrame(processed);
+        else pushFrame(processed);
+      };
+      img.onerror = () => { frames.push({ name: frameData.name, file: frameData.file, img: null, isBackground: frameData.isBackground, draw(){} }); resolve(); };
+      img.src = 'MARCOS/' + frameData.file;
+    })));
+  }
+
+  function initFramesGrid() {
+    const grid = document.getElementById('frameGrid');
+    grid.innerHTML = '';
+    frames.forEach((f, i) => {
+      const div = document.createElement('div');
+      div.className = 'frame-opt' + (i === curFrame ? ' active' : '');
+      div.onclick = () => { curFrame = i; document.querySelectorAll('.frame-opt').forEach((el,j)=>el.classList.toggle('active',j===i)); render(); };
+      const img = document.createElement('img');
+      img.src = 'MARCOS/' + f.file;
+      const nm = document.createElement('div'); nm.className = 'fname'; nm.textContent = f.name;
+      // Badge fondo vs marco
+      const badge = document.createElement('div');
+      badge.style.cssText = 'font-size:.58rem;font-weight:700;text-align:center;padding:2px 0;letter-spacing:.5px;' +
+        (f.isBackground
+          ? 'background:#4a7c59;color:#fff;'
+          : 'background:#9B2335;color:#fff;');
+      badge.textContent = f.isBackground ? '🖼 FONDO' : '✦ MARCO';
+      div.appendChild(img); div.appendChild(badge); div.appendChild(nm);
+      grid.appendChild(div);
+    });
+  }
+
+  // -------- UI helpers ----------
+  const cv = document.getElementById('previewCanvas');
+  const ctx = cv.getContext('2d');
+
+  function drawPhoto(c, img, st, SZ) {
+    if (!img) return;
+    const iw = img.naturalWidth || img.width || 1, ih = img.naturalHeight || img.height || 1;
+    const rotated = (st.rot % 180 !== 0);
+    const srcW = rotated ? ih : iw, srcH = rotated ? iw : ih;
+    const baseScale = Math.max(SZ / srcW, SZ / srcH);
+    const dw = srcW * baseScale * st.scale;
+    const dh = srcH * baseScale * st.scale;
+    const positions = {
+      'top-left': [0,0], 'top-center': [SZ/2-dw/2,0], 'top-right': [SZ-dw,0],
+      'mid-left': [0,SZ/2-dh/2], 'mid-center': [SZ/2-dw/2,SZ/2-dh/2], 'mid-right': [SZ-dw,SZ/2-dh/2],
+      'bot-left': [0,SZ-dh], 'bot-center': [SZ/2-dw/2,SZ-dh], 'bot-right': [SZ-dw,SZ-dh]
+    };
+    const [x, y] = positions[st.pos] || positions['mid-center'];
+    c.save();
+    c.beginPath(); c.rect(0,0,SZ,SZ); c.clip();
+    c.translate(x + dw/2, y + dh/2);
+    if (st.flip) c.scale(-1, 1);
+    c.rotate(st.rot * Math.PI / 180);
+    c.drawImage(img, -dw/2, -dh/2, dw, dh);
+    c.restore();
+  }
+
+  function render() {
+    const SZ = 800;
+    cv.width = SZ; cv.height = SZ;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0,0,SZ,SZ);
+
+    const frame = frames[curFrame];
+
+    // 1) Dibujar FONDO (si el marco seleccionado es fondo)
+    if (frame && frame.isBackground && frame.img && frame.img.complete && frame.img.naturalWidth) {
+      ctx.drawImage(frame.img, 0, 0, SZ, SZ);
+    }
+
+    // 2) Dibujar fotos del usuario encima del fondo
+    photos.forEach((p,i) => { if(p) drawPhoto(ctx, p, state[i], SZ); });
+
+    // 3) Dibujar MARCO (si el marco seleccionado NO es fondo, va encima de la foto)
+    if (frame && !frame.isBackground && frame.img && frame.img.complete && frame.img.naturalWidth) {
+      ctx.drawImage(frame.img, 0, 0, SZ, SZ);
+    }
+
+    cv.style.display = 'block';
+    document.getElementById('noMsg').style.display = photos.some(Boolean) ? 'none' : 'flex';
+  }
+
+  function updateUI() {
+    const hasAny = photos.some(Boolean);
+    document.getElementById('thumbSection').style.display = hasAny ? 'block' : 'none';
+    document.getElementById('photoCtrl').style.display = hasAny ? 'block' : 'none';
+    document.getElementById('dlBtn').disabled = !hasAny;
+    if (!hasAny) return;
+
+    const row = document.getElementById('thumbRow');
+    row.innerHTML = '';
+    photos.forEach((p,i) => {
+      if(!p) return;
+      const item = document.createElement('div');
+      item.className = 'thumb-item' + (i===curPhoto ? ' active' : '');
+      item.onclick = () => { selectPhoto(i); };
+      const img = document.createElement('img'); img.src = p.src;
+      const badge = document.createElement('div'); badge.className = 'thumb-badge'; badge.textContent = `Foto ${i+1}`;
+      item.appendChild(img); item.appendChild(badge);
+      row.appendChild(item);
+    });
+    document.getElementById('scaleSlider').value = state[curPhoto].scale;
+    document.getElementById('scaleVal').innerText = Math.round(state[curPhoto].scale*100)+'%';
+    document.getElementById('angleSlider').value = state[curPhoto].rot;
+    document.getElementById('angleVal').innerText = state[curPhoto].rot + '°';
+    document.querySelectorAll('.pos-btn').forEach(b => b.classList.toggle('active', b.dataset.pos === state[curPhoto].pos));
+    document.getElementById('selBtn1').classList.toggle('active', curPhoto===0);
+    document.getElementById('selBtn2').classList.toggle('active', curPhoto===1);
+    if(photos[1]) document.getElementById('selBtn2').disabled = false; else document.getElementById('selBtn2').disabled = true;
+  }
+
+  function selectPhoto(idx) { if(photos[idx]) { curPhoto = idx; updateUI(); render(); } }
+
+  // -------- EVENTOS EDICIÓN ----------
+  function setRotAngle(angle) {
+    let newAngle = angle % 360;
+    if (newAngle < 0) newAngle += 360;
+    state[curPhoto].rot = newAngle;
+    document.getElementById('angleSlider').value = newAngle;
+    document.getElementById('angleVal').innerText = newAngle + '°';
+    render();
+  }
+  function rotateDelta(delta) { setRotAngle(state[curPhoto].rot + delta); }
+  function resetRotation() { setRotAngle(0); }
+  function flipPhoto() { state[curPhoto].flip = !state[curPhoto].flip; render(); updateUI(); }
+
+  // -------- UPLOAD ----------
+  function setupUpload(zoneId, inputId, idx) {
+    const zone = document.getElementById(zoneId), input = document.getElementById(inputId);
+    input.addEventListener('change', e => { if(e.target.files[0]) loadPhoto(idx, e.target.files[0]); });
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); if(e.dataTransfer.files[0]) loadPhoto(idx, e.dataTransfer.files[0]); });
+  }
+  function loadPhoto(idx, file) {
+    if (!file.type.startsWith('image/')) { toast('Formato no válido', 'error'); return; }
+    if (file.size > 15*1024*1024) { toast('Max 15 MB', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        photos[idx] = img;
+        state[idx] = { scale: 1.0, pos: 'mid-center', rot: 0, flip: false };
+        curPhoto = idx;
+        document.getElementById(`zone${idx+1}`).classList.add('loaded');
+        updateUI();
+        render();
+        toast('Foto lista!', 'success');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    photos[0]=null; photos[1]=null;
+    state[0]={scale:1,pos:'mid-center',rot:0,flip:false}; state[1]={scale:1,pos:'mid-center',rot:0,flip:false};
+    curPhoto=0; document.getElementById('file1').value=''; document.getElementById('file2').value='';
+    document.getElementById('zone1').classList.remove('loaded'); document.getElementById('zone2').classList.remove('loaded');
+    document.getElementById('selBtn2').disabled=true;
+    updateUI(); render();
+    toast('Fotos eliminadas');
+  });
+
+  // -------- CONTROLES ----------
+  document.getElementById('scaleSlider').addEventListener('input', e => { state[curPhoto].scale = parseFloat(e.target.value); document.getElementById('scaleVal').innerText = Math.round(state[curPhoto].scale*100)+'%'; render(); });
+  document.getElementById('angleSlider').addEventListener('input', e => setRotAngle(parseInt(e.target.value)));
+  document.getElementById('resetRotBtn').addEventListener('click', resetRotation);
+  document.getElementById('rotLeftBtn').addEventListener('click', () => rotateDelta(-15));
+  document.getElementById('rotRightBtn').addEventListener('click', () => rotateDelta(15));
+  document.getElementById('flipBtn').addEventListener('click', flipPhoto);
+  document.querySelectorAll('.pos-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.pos-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); state[curPhoto].pos = b.dataset.pos; render();
+  }));
+  document.getElementById('selBtn1').onclick = () => selectPhoto(0);
+  document.getElementById('selBtn2').onclick = () => selectPhoto(1);
+
+  // -------- CROP ----------
+  const cropOverlay = document.getElementById('cropOverlay');
+  const cropCanvas = document.getElementById('cropCanvas');
+  const cropCtx = cropCanvas.getContext('2d');
+  let cropImg = null, cropScale = 1, cropRect = null, isDraggingCrop = false, dragStartCrop = null;
+  function openCrop() { if(!photos[curPhoto]) return; cropImg = photos[curPhoto]; const maxW = Math.min(480, window.innerWidth-64); cropScale = maxW / cropImg.naturalWidth; cropCanvas.width = Math.round(cropImg.naturalWidth*cropScale); cropCanvas.height = Math.round(cropImg.naturalHeight*cropScale); cropRect = null; drawCropCanvas(); cropOverlay.classList.add('open'); }
+  function closeCrop() { cropOverlay.classList.remove('open'); }
+  function drawCropCanvas() { cropCtx.clearRect(0,0,cropCanvas.width,cropCanvas.height); cropCtx.drawImage(cropImg,0,0,cropCanvas.width,cropCanvas.height); if(cropRect){ cropCtx.fillStyle='rgba(0,0,0,0.5)'; cropCtx.fillRect(0,0,cropCanvas.width,cropCanvas.height); cropCtx.clearRect(cropRect.x,cropRect.y,cropRect.w,cropRect.h); cropCtx.strokeStyle='#fff'; cropCtx.lineWidth=2; cropCtx.strokeRect(cropRect.x,cropRect.y,cropRect.w,cropRect.h); } }
+  function getCanvasPos(e){ const r=cropCanvas.getBoundingClientRect(); const sx=cropCanvas.width/r.width, sy=cropCanvas.height/r.height; const cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; return {x:(cx-r.left)*sx, y:(cy-r.top)*sy}; }
+  function startDragCrop(e){ e.preventDefault(); isDraggingCrop=true; dragStartCrop=getCanvasPos(e); cropRect=null; }
+  function moveDragCrop(e){ if(!isDraggingCrop) return; e.preventDefault(); const pos=getCanvasPos(e); cropRect={x:Math.min(dragStartCrop.x,pos.x), y:Math.min(dragStartCrop.y,pos.y), w:Math.abs(pos.x-dragStartCrop.x), h:Math.abs(pos.y-dragStartCrop.y)}; drawCropCanvas(); }
+  function endDragCrop(){ isDraggingCrop=false; }
+  cropCanvas.addEventListener('mousedown',startDragCrop); cropCanvas.addEventListener('touchstart',startDragCrop,{passive:false}); cropCanvas.addEventListener('mousemove',moveDragCrop); cropCanvas.addEventListener('touchmove',moveDragCrop,{passive:false}); cropCanvas.addEventListener('mouseup',endDragCrop); cropCanvas.addEventListener('touchend',endDragCrop);
+  window.applyCrop = function() {
+    if(!cropRect||cropRect.w<5||cropRect.h<5){ toast('Selecciona área', 'error'); return; }
+    const sx=cropRect.x/cropScale, sy=cropRect.y/cropScale, sw=cropRect.w/cropScale, sh=cropRect.h/cropScale;
+    const tmp=document.createElement('canvas'); tmp.width=Math.round(sw); tmp.height=Math.round(sh);
+    tmp.getContext('2d').drawImage(cropImg,sx,sy,sw,sh,0,0,tmp.width,tmp.height);
+    const newImg=new Image(); newImg.onload=()=>{ photos[curPhoto]=newImg; state[curPhoto].scale=1.0; closeCrop(); updateUI(); render(); toast('Recorte aplicado','success'); }; newImg.src=tmp.toDataURL('image/png');
+  };
+  window.closeCrop = closeCrop;
+
+  // -------- DOWNLOAD RESOLUTION ----------
+  function downloadImage() {
+    if(!photos.some(Boolean)) return;
+    const targetSize = parseInt(document.getElementById('resSel').value);
+    const renderCanvas = document.createElement('canvas');
+    renderCanvas.width = targetSize; renderCanvas.height = targetSize;
+    const rctx = renderCanvas.getContext('2d');
+    rctx.fillStyle = '#FFFFFF';
+    rctx.fillRect(0,0,targetSize,targetSize);
+
+    const frame = frames[curFrame];
+
+    // 1) Fondo primero
+    if(frame && frame.isBackground && frame.img && frame.img.complete && frame.img.naturalWidth) {
+      rctx.drawImage(frame.img, 0, 0, targetSize, targetSize);
+    }
+
+    // 2) Fotos encima
+    photos.forEach((p,i)=>{ if(p) drawPhoto(rctx, p, state[i], targetSize); });
+
+    // 3) Marco encima de las fotos
+    if(frame && !frame.isBackground && frame.img && frame.img.complete && frame.img.naturalWidth) {
+      rctx.drawImage(frame.img, 0, 0, targetSize, targetSize);
+    }
+
+    try {
+      renderCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=`marco-uaeh-${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        toast('Descarga completada', 'success');
+      },'image/png');
+    } catch(e){ toast('Error al generar imagen', 'error'); }
+  }
+  document.getElementById('dlBtn').onclick = downloadImage;
+  document.getElementById('cropBtn').onclick = openCrop;
+
+  // -------- INIT ----------
+  setupUpload('zone1','file1',0); setupUpload('zone2','file2',1);
+  preloadPngFrames().then(() => {
+    initFramesGrid();
+    cv.width=800; cv.height=800; cv.style.display='block';
+    if(frames[0] && frames[0].img && frames[0].img.complete) render();
+    else setTimeout(render, 200);
+  });
+  function toast(msg,type=''){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(type?' '+type:''); clearTimeout(t._tid); t._tid=setTimeout(()=>t.className='toast',2500); }
+</script>
+</body>
+</html>
